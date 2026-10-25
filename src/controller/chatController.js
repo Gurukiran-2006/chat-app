@@ -44,7 +44,7 @@ const createConversation = async (req, res) => {
       return res.status(503).json({ message: err.message });
     }
  
-    // Ollama lists names with a tag, e.g. "llama3.2-gpu:latest". Accept the short form too.
+    // Ollama lists names with a tag
     const wanted = model.trim();
     const found = available.find((n) => n === wanted || n === `${wanted}:latest`);
     if (!found) {
@@ -82,7 +82,7 @@ const getConversation=async(req,res)=>{
       const convo=await conversation.find({_id:req.params.id,user:req.user._id});
 
       if(!convo){
-        return res.status(404).json({"Conversation not found"});
+        return res.status(404).json({message:"Conversation not found"});
       }
 
       const messages=await message.find({conversation:convo._id})
