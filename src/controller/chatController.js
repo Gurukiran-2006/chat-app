@@ -44,7 +44,7 @@ const createConversation = async (req, res) => {
       return res.status(503).json({ message: err.message });
     }
  
-    // Ollama lists names with a tag, e.g. "llama3.2-gpu:latest". Accept the short form too.
+    // Ollama lists names with a tag
     const wanted = model.trim();
     const found = available.find((n) => n === wanted || n === `${wanted}:latest`);
     if (!found) {
@@ -99,7 +99,7 @@ const getConversation=async(req,res)=>{
 const updateConversation=async(req,res)=>{
   try{
 
-     const {title,systemPrompt}=req.body;
+     const {title,systemPrompt=""}=req.body;
      
      const updates={};
      if(title!==undefined){
