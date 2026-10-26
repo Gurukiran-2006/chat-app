@@ -82,7 +82,7 @@ const getConversation=async(req,res)=>{
       const convo=await conversation.find({_id:req.params.id,user:req.user._id});
 
       if(!convo){
-        return res.status(404).json({"Conversation not found"});
+        return res.status(404).json({message:"Conversation not found"});
       }
 
       const messages=await message.find({conversation:convo._id})
@@ -94,4 +94,44 @@ const getConversation=async(req,res)=>{
   catch(err){
     return serverError(res,"getConversation",err);
   }
-}
+};
+
+const updateConversation=async(req,res)=>{
+  try{
+
+     const {title,systemPrompt}=req.body;
+     
+     const updates={};
+     if(title!==undefined){
+      if(typeof title!=="String" || !title.trim() || title.trim().length>100){
+         return res.status(404).json({message:"title must be 1 to 100 characters"});
+      }
+      updates.title=title.trim();
+     }
+
+     if(systemPrompt!==undefined){
+      if(typeof systemPrompt!=="String" || systemPrompt.length>2000){
+        return res.status(404).json({message:"systemPrompt cannot exceed 2000 characters"});
+      }
+      updates.systemPrompt=systemPrompt;
+     }
+     
+     if(Object.keys(updates).length===0){
+      return res.status(404).json({message:"othing to update"});
+     }
+
+      const convo=await conversation.findOneAndUpdate({_id:req.params.id,user:req.user._id},
+        updates,
+        {new:true, runValidators:true}
+      );
+
+      if(!convo){
+        return res.status(404).json({message:"Cinversation not found"});
+      }
+     
+      return res.json({conversation:toSummary(convo)});
+  }
+  catch(err){
+   return serverError(res,"updateConversation",err);
+  }
+};
