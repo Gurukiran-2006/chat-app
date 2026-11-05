@@ -1,6 +1,6 @@
 const mongoose=require("mongoose");
 
-const conversationSchema=new mongoose.model({
+const conversationSchema=new mongoose.Schema({
     user:{
         type:mongoose.Schema.Types.ObjectId,
         ref:"User",
@@ -25,7 +25,7 @@ const conversationSchema=new mongoose.model({
   },
 },
 {
-    timestamps:true
+    timestamps:true,
 });
 
 conversationSchema.index({user:1,updatedAt:-1});

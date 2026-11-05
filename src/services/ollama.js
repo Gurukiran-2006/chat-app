@@ -1,5 +1,3 @@
-const { parse } = require("cookieparser");
-
 const BASE_URL=process.env.OLLAMA_URL || "http://localhost:11434";
 
 const NOT_REACHABLE="ollama is not reachable is it running?";
@@ -22,9 +20,9 @@ const listModels=async ()=>{
 }
 
 // Turn one line of Ollama's output into an object
-const parseLine=async ()=>{
+const parseLine= (line)=>{
     const obj=JSON.parse(line);
-    if(obj.error) throw new Error('ollama Error ${res.status}');
+    if(obj.error) throw new Error(`ollama Error ${obj.error}`);
     return obj;
 }
 
@@ -33,18 +31,18 @@ const parseLine=async ()=>{
 // Each chunk looks like { message: { role, content }, done: false }.
 // The last chunk has done: true plus stats (token counts, durations).
 
-async function*streamChat({models,message,signal,options}){
+async function*streamChat({model,messages,signal,options,think}){
     let res;
     try{
-     res=await fetch(`${BASE_URL}/api/chats`,{
+     res=await fetch(`${BASE_URL}/api/chat`,{
      method:"POST",
      headers:{"Content-Type":"application/json"},
-     body:JSON.stringify({models,message,stream:true,options}),
+     body:JSON.stringify({model,messages,stream:true,think,options}),
      signal,
      });
     }
     catch(err){
-    if(err.name=== "AbortError")
+    if(err.name=== "AbortError") throw err;
         throw new Error(NOT_REACHABLE);
     }
 
@@ -71,7 +69,7 @@ async function*streamChat({models,message,signal,options}){
     buffer = lines.pop(); // the last piece may be incomplete; keep it for next time
  
     for (const line of lines) {
-      if (line.trim()) yield parseLine(line);
+      if (line.trim()) yield parseLine(line); 
     }
   }
  

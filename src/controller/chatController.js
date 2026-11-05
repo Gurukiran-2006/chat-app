@@ -1,6 +1,6 @@
 const conversation=require("../models/Conversation");
 const message=require("../models/Message");
-const {listModels}=require("../service/ollama");
+const {listModels}=require("../services/ollama");
 
 //what is client is allowed to see
 const toSummary=(c)=>({
@@ -28,7 +28,7 @@ const getModels=async(req,res)=>{
 // POST /chat/conversations
 const createConversation = async (req, res) => {
   try {
-    const { model, systemPrompt = "" } = req.body;
+    const { model, systemPrompt=""} = req.body;
  
     if (typeof model !== "string" || !model.trim()) {
       return res.status(400).json({ message: "A model is required." });
@@ -79,7 +79,7 @@ const listConversation=async(req,res)=>{
 
 const getConversation=async(req,res)=>{
   try{
-      const convo=await conversation.find({_id:req.params.id,user:req.user._id});
+      const convo=await conversation.findOne({_id:req.params.id,user:req.user._id});
 
       if(!convo){
         return res.status(404).json({message:"Conversation not found"});
@@ -89,7 +89,7 @@ const getConversation=async(req,res)=>{
       .sort({createdAt:1})
       .select("role content model createdAt");
 
-      return res.json({converstion:toSummary(convo),messages});
+      return res.json({conversation:toSummary(convo),messages});
   }
   catch(err){
     return serverError(res,"getConversation",err);
@@ -103,14 +103,14 @@ const updateConversation=async(req,res)=>{
      
      const updates={};
      if(title!==undefined){
-      if(typeof title!=="String" || !title.trim() || title.trim().length>100){
+      if(typeof title!=="string" || !title.trim() || title.trim().length>100){
          return res.status(404).json({message:"title must be 1 to 100 characters"});
       }
       updates.title=title.trim();
      }
 
      if(systemPrompt!==undefined){
-      if(typeof systemPrompt!=="String" || systemPrompt.length>2000){
+      if(typeof systemPrompt!=="string" || systemPrompt.length>2000){
         return res.status(404).json({message:"systemPrompt cannot exceed 2000 characters"});
       }
       updates.systemPrompt=systemPrompt;
@@ -135,3 +135,33 @@ const updateConversation=async(req,res)=>{
    return serverError(res,"updateConversation",err);
   }
 };
+
+const deleteConversation=async(req,res)=>{
+  try{
+   const convo=await conversation.findOneAndDelete({
+    _id:req.params.id,
+    user:req.user.id,
+   });
+
+   if(!convo){
+    return res.status(404).json({
+      message:"Conversation not found"
+    });
+   }
+
+   await message.deleteMany({
+    conversation:convo._id
+   });
+
+   return res.status(200).json({
+    message:"conversation deleted successfully"
+   });
+
+  }
+  catch(err){
+    return serverError(res,"deleteConversation",err);
+  }
+};
+
+module.exports={getModels,createConversation,listConversation,getConversation,updateConversation,deleteConversation};
+

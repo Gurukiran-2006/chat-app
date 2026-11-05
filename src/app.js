@@ -13,8 +13,10 @@ app.use(cookieParser());
 const connectDB = require("./config/database");
 const requireAuth = require("./middleware/auth");
 const authRouter = require("./routes/authRouter");
+const chatRouter=require("./routes/chatRouter");
 
 app.use("/auth",authRouter);
+app.use("/chat",requireAuth,chatRouter);
 
 connectDB()
 .then(()=>{

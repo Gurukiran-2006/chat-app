@@ -1,6 +1,6 @@
 const mongoose=require("mongoose");
 
-const mongooseSchema=new mongoose.Schema({
+const messageSchema=new mongoose.Schema({
     conversation:{
         type:mongoose.Schema.Types.ObjectId,
         required:true,
@@ -19,7 +19,7 @@ const mongooseSchema=new mongoose.Schema({
         type:String
     },
 },
-{timestamps:true
+{timestamps:true,
 });
 
 messageSchema.index({conversation:1,createdAt:-1});
