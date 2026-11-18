@@ -18,6 +18,12 @@ const messageSchema=new mongoose.Schema({
     model:{
         type:String
     },
+// true when the input guard blocked this prompt. Blocked messages stay visible
+// in the chat history but are never sent to the model.
+blocked: { 
+    type: Boolean, 
+    default: false 
+},
 },
 {timestamps:true,
 });

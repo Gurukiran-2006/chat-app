@@ -87,7 +87,7 @@ const getConversation=async(req,res)=>{
 
       const messages=await message.find({conversation:convo._id})
       .sort({createdAt:1})
-      .select("role content model createdAt");
+      .select("role content model blocked createdAt");
 
       return res.json({conversation:toSummary(convo),messages});
   }
